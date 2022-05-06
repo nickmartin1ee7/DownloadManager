@@ -1,0 +1,102 @@
+﻿<Window x:Class="DownloadManager.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DownloadManager"
+        mc:Ignorable="d"
+        Title="Download Manager" Height="550" Width="900">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" /> <!-- Space for buttons -->
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" /> <!-- Save Location Label and Change Save Location Btn -->
+                <RowDefinition Height="Auto" /> <!-- Label and Add Btn-->
+                <RowDefinition Height="*" />    <!-- Downloads ListView -->
+                <RowDefinition Height="Auto" /> <!-- Start Btn -->
+            </Grid.RowDefinitions>
+
+            <TextBox Name="SaveLocationTextBox"
+                     Grid.Column="0"
+                     Grid.Row="0"
+                     Margin="10,10,0,10"
+                     Text=""
+                     MinWidth="200"
+                     BorderThickness="1" />
+
+            <Button Name="ChangeSaveLocationButton"
+                     Grid.Column="1"
+                     Grid.Row="0"
+                     Margin="10,10,10,10"
+                     Content="Change Save Location" />
+
+            <Label Name="DownloadQueueLabel"
+                   Grid.Column="0"
+                   Grid.Row="1"
+                    Margin="0,10,0,10"
+                   HorizontalContentAlignment="Center"
+                   FontWeight="Bold"
+                   Content="Download Queue" />
+
+            <Button Name="AddButton"
+                    Grid.Column="1"
+                    Grid.Row="1"
+                    Margin="10,10,10,10"
+                    Content="Add" />
+
+            <ListView Name="JobsListView"
+                      Grid.Column="0"
+                      Grid.Row="2"
+                      Grid.ColumnSpan="2"
+                      ItemsSource="{Binding Jobs}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Label Grid.Column="0"
+                                   Content="{Binding}" />
+
+                            <ProgressBar Grid.Column="1"  />
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <Button Name="StartButton"
+                    Grid.Column="0"
+                    Grid.Row="3"
+                    Grid.ColumnSpan="2"
+                    Margin="25,10,25,10"
+                    Content="Start Jobs" />
+        </Grid>
+
+        <GridSplitter Name="PanelGridSplitter"
+                      Grid.Column="0"
+                      VerticalAlignment="Stretch"
+                      Background="Gray" 
+                      ShowsPreview="True"
+                      Width="3" />
+
+        <TextBox Name="OutputTextBox"
+                 Grid.Column="1"
+                 IsReadOnly="True"
+                 VerticalScrollBarVisibility="Visible"
+                 Text="TEST" />
+
+    </Grid>
+</Window>
