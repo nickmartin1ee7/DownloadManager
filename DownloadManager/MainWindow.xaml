@@ -96,7 +96,7 @@
                  Grid.Column="1"
                  IsReadOnly="True"
                  VerticalScrollBarVisibility="Visible"
-                 Text="TEST" />
+                 Text="Waiting for user..." />
 
     </Grid>
 </Window>
