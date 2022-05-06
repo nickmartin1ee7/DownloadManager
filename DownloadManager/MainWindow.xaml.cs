@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using DownloadManager.ViewModels;
 
 namespace DownloadManager
 {
@@ -20,9 +21,13 @@ namespace DownloadManager
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly MainWindowViewModel _vm;
+
         public MainWindow()
         {
             InitializeComponent();
+            _vm = new();
+            DataContext = _vm;
         }
     }
 }

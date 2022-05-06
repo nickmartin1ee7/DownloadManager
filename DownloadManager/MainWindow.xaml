@@ -71,7 +71,12 @@
                             <Label Grid.Column="0"
                                    Content="{Binding}" />
 
-                            <ProgressBar Grid.Column="1"  />
+                            <ProgressBar Name="ItemProgressBar" 
+                                <!-- TODO:
+                                    Maximum="{Binding FileSize}"
+                                    Value="{Binding BytesTransferred}"/>
+                                -->
+                                         Grid.Column="1"  />
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
