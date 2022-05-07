@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Text;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -11,12 +13,24 @@ namespace DownloadManager
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly Timer _timer = new(50);
+        private readonly StringBuilder _outputTextBoxBuffer = new();
         private readonly MainWindowViewModel _vm;
 
         public MainWindow()
         {
             InitializeComponent();
-            _vm = new(text => OutputTextBox.Text = text);
+            _vm = new(text =>
+            {
+                if (!_timer.Enabled) _timer.Start();
+
+                _outputTextBoxBuffer.Append(text);
+            });
+            
+            _timer.Elapsed += (_, _) =>
+                Dispatcher.Invoke(() =>
+                    OutputTextBox.Text = _outputTextBoxBuffer.ToString());
+
             DataContext = _vm;
 
             SaveLocationTextBox.Text = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
@@ -24,16 +38,9 @@ namespace DownloadManager
 
         private void SaveLocationTextBox_OnTextChanged(object sender, TextChangedEventArgs e)
         {
-            var isValid = _vm.IsSaveLocationValid(SaveLocationTextBox.Text);
-
-            SaveLocationTextBox.Foreground = isValid
+            SaveLocationTextBox.Foreground = _vm.HandleSaveLocation(SaveLocationTextBox.Text)
                 ? new SolidColorBrush(Colors.Green)
                 : new SolidColorBrush(Colors.Red);
-
-            if (isValid)
-            {
-                _vm.ChangeSaveLocation(SaveLocationTextBox.Text);
-            }
         }
     }
 }
