@@ -29,7 +29,20 @@ namespace DownloadManager.ViewModels
             _dispatch = dispatch;
             AddCommand = new Command(Add);
             StartJobsCommand = new Command(async o =>
-                await StartJobsAsync(o));
+            {
+                _dispatch(RemoveCompletedJobs);
+                await StartJobsAsync(o);
+            });
+        }
+
+        private void RemoveCompletedJobs()
+        {
+            var jobsToRemove = Jobs.Where(jobReport => jobReport.PercentageComplete == 100).ToArray();
+
+            foreach (var jobReport in jobsToRemove)
+            {
+                Jobs.Remove(jobReport);
+            }
         }
 
         private void Add(object? _)
@@ -37,7 +50,6 @@ namespace DownloadManager.ViewModels
             // TODO popup window
             Jobs.Add(new JobReportModel((uint)Jobs.Count + 1, "http://pi.hole"));
         }
-
 
         public bool HandleSaveLocation(string? saveLocationPath)
         {
@@ -81,8 +93,7 @@ namespace DownloadManager.ViewModels
 
                 client.DownloadProgressChanged += (o, e) =>
                 {
-                    jobReport.BytesTransferred = (ulong) e.BytesReceived;
-                    jobReport.FileSize = (ulong) e.TotalBytesToReceive;
+                    jobReport.PercentageComplete = e.ProgressPercentage;
                 };
 
                 Log($"Starting job {jobReport.Id}...");
@@ -99,8 +110,6 @@ namespace DownloadManager.ViewModels
                 sw.Stop();
 
                 Log($"Job {jobReport.Id} finished! ({sw.ElapsedMilliseconds} ms)");
-
-                _dispatch(() => Jobs.Remove(jobReport));
             }
             catch (Exception e)
             {
@@ -110,11 +119,13 @@ namespace DownloadManager.ViewModels
 
         private string CreateNewFilePath(string fileName)
         {
+            if (string.IsNullOrWhiteSpace(fileName)) fileName = "index.html";
+
             var fileInfo = new FileInfo(Path.Combine(_saveLocation!.FullName, fileName));
 
             while (fileInfo.Exists)
             {
-                var filePath = Path.GetFileNameWithoutExtension(fileInfo.Name) + "_copy" + fileInfo.Extension;
+                var filePath = Path.Combine(_saveLocation!.FullName, Path.GetFileNameWithoutExtension(fileInfo.Name) + "_copy" + fileInfo.Extension);
                 fileInfo = new FileInfo(filePath);
             }
 

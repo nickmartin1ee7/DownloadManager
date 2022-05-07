@@ -57,17 +57,22 @@
                     Command="{Binding AddCommand}"
                     Content="Add" />
 
-            <ListView Name="JobsListView"
+            <ListBox Name="JobsListView"
                       Grid.Column="0"
                       Grid.Row="2"
                       Grid.ColumnSpan="2"
                       ItemsSource="{Binding Jobs}">
-                <ListView.ItemTemplate>
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"></Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" /> <!-- Job -->
+                                <ColumnDefinition Width="*" /> <!-- Job's Progress -->
                             </Grid.ColumnDefinitions>
 
                             <Label Grid.Column="0"
@@ -75,12 +80,11 @@
 
                             <ProgressBar Name="ItemProgressBar" 
                                          Grid.Column="1"
-                                         Maximum="{Binding FileSize}"
-                                         Value="{Binding BytesTransferred}" />
+                                         Value="{Binding PercentageComplete}" />
                         </Grid>
                     </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                </ListBox.ItemTemplate>
+            </ListBox>
 
             <Button Name="StartButton"
                     Grid.Column="0"
