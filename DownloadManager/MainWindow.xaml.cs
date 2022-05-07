@@ -29,5 +29,12 @@ namespace DownloadManager
             _vm = new();
             DataContext = _vm;
         }
+
+        private void SaveLocationTextBox_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            SaveLocationTextBox.Foreground = _vm.IsSaveLocationValid(SaveLocationTextBox.Text)
+                ? new SolidColorBrush(Colors.Green)
+                : new SolidColorBrush(Colors.Red);
+        }
     }
 }

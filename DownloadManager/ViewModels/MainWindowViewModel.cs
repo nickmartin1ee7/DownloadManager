@@ -23,9 +23,13 @@ namespace DownloadManager.ViewModels
             ChangeSaveLocationCommand = new Command(ChangeSaveLocation);
         }
 
+        public bool IsSaveLocationValid(string text) =>
+            Directory.Exists(text);
+
         private void Add(object? _)
         {
-
+            // TODO popup window
+            Jobs.Add(new JobReportModel("https://google.com"));
         }
 
 

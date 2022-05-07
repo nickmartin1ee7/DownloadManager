@@ -33,6 +33,7 @@
                      Margin="10,10,0,10"
                      Text=""
                      MinWidth="200"
+                     TextChanged="SaveLocationTextBox_OnTextChanged"
                      BorderThickness="1" />
 
             <Button Name="ChangeSaveLocationButton"
