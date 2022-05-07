@@ -39,6 +39,7 @@
                      Grid.Column="1"
                      Grid.Row="0"
                      Margin="10,10,10,10"
+                     Command="{Binding ChangeSaveLocationCommand}"
                      Content="Change Save Location" />
 
             <Label Name="DownloadQueueLabel"
@@ -53,6 +54,7 @@
                     Grid.Column="1"
                     Grid.Row="1"
                     Margin="10,10,10,10"
+                    Command="{Binding AddCommand}"
                     Content="Add" />
 
             <ListView Name="JobsListView"
