@@ -4,22 +4,17 @@ namespace DownloadManager.ViewModels;
 
 public class JobReportModel
 {
-    public Uri Uri { get; init; }
+    public Uri Uri { get; }
 
-    // public ushort ProcessCompleted =>
-    //     (ushort)(BytesTransferred * 100 / FileSize);
+    public uint Id { get; }
 
     public ulong FileSize { get; set; }
 
     public ulong BytesTransferred { get; set; }
-
-    public JobReportModel(Uri uri)
+    
+    public JobReportModel(uint id, string uri)
     {
-        Uri = uri;
-    }
-
-    public JobReportModel(string uri)
-    {
+        Id = id;
         Uri = new Uri(uri);
     }
 

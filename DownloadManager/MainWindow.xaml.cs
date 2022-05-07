@@ -23,13 +23,17 @@ namespace DownloadManager
             _vm = new(text =>
             {
                 if (!_timer.Enabled) _timer.Start();
-
                 _outputTextBoxBuffer.Append(text);
-            });
+            }, Dispatcher.Invoke);
             
             _timer.Elapsed += (_, _) =>
                 Dispatcher.Invoke(() =>
-                    OutputTextBox.Text = _outputTextBoxBuffer.ToString());
+                {
+                    if (OutputTextBox.Text.Length == _outputTextBoxBuffer.Length) return;
+
+                    OutputTextBox.Text = _outputTextBoxBuffer.ToString();
+                    OutputTextBoxScrollViewer.ScrollToEnd();
+                });
 
             DataContext = _vm;
 

@@ -98,12 +98,13 @@
                       ShowsPreview="True"
                       Width="3" />
 
-        <TextBox Name="OutputTextBox"
-                 Grid.Column="1"
-                 IsReadOnly="True"
-                 TextWrapping="Wrap"
-                 VerticalScrollBarVisibility="Visible"
-                 Text="Waiting for user..." />
+        <ScrollViewer Name="OutputTextBoxScrollViewer"
+                      Grid.Column="1">
+            <TextBox Name="OutputTextBox"
+                     IsReadOnly="True"
+                     TextWrapping="Wrap"
+                     Text="Waiting for user..." />
+        </ScrollViewer>
 
     </Grid>
 </Window>

@@ -13,7 +13,7 @@ namespace DownloadManager.ViewModels
     public class MainWindowViewModel
     {
         private readonly Action<string> _updateLogOutput;
-        private int _lastJobId;
+        private readonly Action<Action> _dispatch;
         private DirectoryInfo? _saveLocation;
 
         public ObservableCollection<JobReportModel> Jobs { get; } = new();
@@ -22,9 +22,11 @@ namespace DownloadManager.ViewModels
 
         public ICommand StartJobsCommand { get; }
 
-        public MainWindowViewModel(Action<string> updateLogOutput)
+        public MainWindowViewModel(Action<string> updateLogOutput,
+            Action<Action> dispatch)
         {
             _updateLogOutput = updateLogOutput;
+            _dispatch = dispatch;
             AddCommand = new Command(Add);
             StartJobsCommand = new Command(async o =>
                 await StartJobsAsync(o));
@@ -33,7 +35,7 @@ namespace DownloadManager.ViewModels
         private void Add(object? _)
         {
             // TODO popup window
-            Jobs.Add(new JobReportModel("http://pi.hole"));
+            Jobs.Add(new JobReportModel((uint)Jobs.Count + 1, "http://pi.hole"));
         }
 
 
@@ -71,24 +73,19 @@ namespace DownloadManager.ViewModels
             Log($"All jobs finished! ({sw.ElapsedMilliseconds} ms)");
         }
 
-        private int GetNewJobId() =>
-            ++_lastJobId;
-
         private async Task RunJobAsync(JobReportModel jobReport)
         {
-            var jobId = GetNewJobId();
-
             try
             {
                 using var client = new WebClient();
 
                 client.DownloadProgressChanged += (o, e) =>
                 {
-                    jobReport.BytesTransferred = (ulong)e.BytesReceived;
-                    jobReport.FileSize = (ulong)e.TotalBytesToReceive;
+                    jobReport.BytesTransferred = (ulong) e.BytesReceived;
+                    jobReport.FileSize = (ulong) e.TotalBytesToReceive;
                 };
 
-                Log($"Starting job {jobId}...");
+                Log($"Starting job {jobReport.Id}...");
 
                 var sw = new Stopwatch();
                 sw.Start();
@@ -101,11 +98,13 @@ namespace DownloadManager.ViewModels
 
                 sw.Stop();
 
-                Log($"Job {jobId} finished! ({sw.ElapsedMilliseconds} ms)");
+                Log($"Job {jobReport.Id} finished! ({sw.ElapsedMilliseconds} ms)");
+
+                _dispatch(() => Jobs.Remove(jobReport));
             }
             catch (Exception e)
             {
-                Log($"Job {jobId} failed due to: {e.Message}");
+                Log($"Job {jobReport.Id} failed due to: {e.Message}");
             }
         }
 
