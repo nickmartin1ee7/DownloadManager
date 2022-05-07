@@ -27,21 +27,18 @@
                 <RowDefinition Height="Auto" /> <!-- Start Btn -->
             </Grid.RowDefinitions>
 
+            <Label Name="SaveLocationLabel"
+                   Margin="10,10,10,10"
+                   Content="Save Location:" />
+
             <TextBox Name="SaveLocationTextBox"
-                     Grid.Column="0"
+                     Grid.Column="1"
                      Grid.Row="0"
-                     Margin="10,10,0,10"
+                     Margin="10,10,10,10"
                      Text=""
                      MinWidth="200"
                      TextChanged="SaveLocationTextBox_OnTextChanged"
                      BorderThickness="1" />
-
-            <Button Name="ChangeSaveLocationButton"
-                     Grid.Column="1"
-                     Grid.Row="0"
-                     Margin="10,10,10,10"
-                     Command="{Binding ChangeSaveLocationCommand}"
-                     Content="Change Save Location" />
 
             <Label Name="DownloadQueueLabel"
                    Grid.Column="0"
@@ -88,6 +85,7 @@
                     Grid.Row="3"
                     Grid.ColumnSpan="2"
                     Margin="25,10,25,10"
+                    Command="{Binding StartJobsCommand}"
                     Content="Start Jobs" />
         </Grid>
 
