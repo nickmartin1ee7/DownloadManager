@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -89,23 +89,50 @@ namespace DownloadManager.ViewModels
         {
             try
             {
-                using var client = new WebClient();
-
-                client.DownloadProgressChanged += (o, e) =>
-                {
-                    jobReport.PercentageComplete = e.ProgressPercentage;
-                };
+                using var client = new HttpClient();
 
                 Log($"Starting job {jobReport.Id}...");
 
                 var sw = new Stopwatch();
                 sw.Start();
 
-                var filePath = CreateNewFilePath(Path.GetFileName(jobReport.Uri.LocalPath));
+                using (var response = await client.GetAsync(jobReport.Uri, HttpCompletionOption.ResponseContentRead))
+                {
+                    response.EnsureSuccessStatusCode();
+                    var contentLength = response.Content.Headers.ContentLength;
 
-                await File.Create(filePath).DisposeAsync();
+                    await using Stream contentStream = await response.Content.ReadAsStreamAsync(),
+                        fileStream = new FileStream(CreateNewFilePath(Path.GetFileName(jobReport.Uri.LocalPath)), FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
 
-                await client.DownloadFileTaskAsync(jobReport.Uri, filePath);
+                    var totalRead = 0L;
+                    var totalReads = 0L;
+                    var buffer = new byte[8192];
+                    var isMoreToRead = true;
+
+                    do
+                    {
+                        var read = await contentStream.ReadAsync(buffer, 0, buffer.Length);
+
+                        if (read == 0)
+                        {
+                            isMoreToRead = false;
+                            jobReport.PercentageComplete = 100;
+                        }
+                        else
+                        {
+                            await fileStream.WriteAsync(buffer, 0, read);
+
+                            totalRead += read;
+                            totalReads += 1;
+
+                            if (contentLength is not null)
+                            {
+                                jobReport.PercentageComplete = (int) (totalRead * 100 / contentLength);
+                            }
+                        }
+                    }
+                    while (isMoreToRead);
+                }
 
                 sw.Stop();
 
