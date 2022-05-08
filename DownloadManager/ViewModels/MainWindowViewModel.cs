@@ -64,15 +64,12 @@ namespace DownloadManager.ViewModels
             if (_saveLocation is null) return;
             if (!Jobs.Any()) return;
 
-            var jobTasks = new List<Task>();
-
             Log($"Enqueueing {Jobs.Count} job(s)...)");
 
-            for (var i = 0; i < Jobs.Count; i++)
-            {
-                var jobReport = Jobs[i];
-                jobTasks.Add(new Task(async () => await RunJobAsync(jobReport)));
-            }
+            var jobTasks = Jobs.Select(jobReport =>
+                new Task(async () =>
+                    await RunJobAsync(jobReport)))
+                .ToList();
 
             var sw = new Stopwatch();
             sw.Start();
