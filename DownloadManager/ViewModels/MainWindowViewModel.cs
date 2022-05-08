@@ -105,7 +105,6 @@ namespace DownloadManager.ViewModels
                         fileStream = new FileStream(CreateNewFilePath(Path.GetFileName(jobReport.Uri.LocalPath)), FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
 
                     var totalRead = 0L;
-                    var totalReads = 0L;
                     var buffer = new byte[8192];
                     var isMoreToRead = true;
 
@@ -123,7 +122,6 @@ namespace DownloadManager.ViewModels
                             await fileStream.WriteAsync(buffer, 0, read);
 
                             totalRead += read;
-                            totalReads += 1;
 
                             if (contentLength is not null)
                             {
