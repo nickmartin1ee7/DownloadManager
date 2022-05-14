@@ -20,6 +20,7 @@ namespace DownloadManager
         public MainWindow()
         {
             InitializeComponent();
+
             _vm = new(text =>
             {
                 if (!_timer.Enabled) _timer.Start();

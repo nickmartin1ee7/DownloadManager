@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -14,6 +15,7 @@ namespace DownloadManager.ViewModels
     {
         private readonly Action<string> _updateLogOutput;
         private readonly Action<Action> _dispatch;
+        private readonly ConcurrentDictionary<string, FileInfo> _files = new();
         private DirectoryInfo? _saveLocation;
 
         public ObservableCollection<JobReportModel> Jobs { get; } = new();
@@ -80,6 +82,8 @@ namespace DownloadManager.ViewModels
             sw.Stop();
 
             Log($"All jobs finished! ({sw.ElapsedMilliseconds} ms)");
+
+            _files.Clear();
         }
 
         private async Task RunJobAsync(JobReportModel jobReport)
@@ -99,7 +103,7 @@ namespace DownloadManager.ViewModels
                     var contentLength = response.Content.Headers.ContentLength;
 
                     await using Stream contentStream = await response.Content.ReadAsStreamAsync(),
-                        fileStream = new FileStream(CreateNewFilePath(Path.GetFileName(jobReport.Uri.LocalPath)), FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
+                        fileStream = new FileStream(await CreateNewFilePathAsync(Path.GetFileName(jobReport.Uri.LocalPath)), FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
 
                     var totalRead = 0L;
                     var buffer = new byte[8192];
@@ -139,17 +143,28 @@ namespace DownloadManager.ViewModels
             }
         }
 
-        private string CreateNewFilePath(string fileName)
+        private async Task<string> CreateNewFilePathAsync(string fileName)
         {
+            // Default file
             if (string.IsNullOrWhiteSpace(fileName)) fileName = "index.html";
 
-            var fileInfo = new FileInfo(Path.Combine(_saveLocation!.FullName, fileName));
+            var originalFileInfo = new FileInfo(Path.Combine(_saveLocation!.FullName, fileName));
+            var fileInfo = originalFileInfo;
 
-            while (fileInfo.Exists)
+            while (!_files.TryAdd(fileInfo.Name, fileInfo))
             {
-                var filePath = Path.Combine(_saveLocation!.FullName, Path.GetFileNameWithoutExtension(fileInfo.Name) + "_copy" + fileInfo.Extension);
+                var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(originalFileInfo.Name);
+                var existingSimilarFiles = _files.Count(f => f.Key.StartsWith(fileNameWithoutExtension));
+                var filePath = Path.Combine(_saveLocation!.FullName, $"{fileNameWithoutExtension}_{existingSimilarFiles}{fileInfo.Extension}");
                 fileInfo = new FileInfo(filePath);
+
+                if (fileInfo.Exists) // Already exists, we just didn't know until now
+                {
+                    _files.TryAdd(fileInfo.Name, fileInfo);
+                }
             }
+
+            await fileInfo.Create().DisposeAsync();
 
             return fileInfo.FullName;
         }
